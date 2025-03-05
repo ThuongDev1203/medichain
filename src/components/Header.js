@@ -3,7 +3,7 @@ import { Layout, Menu, Button, Modal, Form, Input } from "antd";
 import { MenuOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Header.css";
-
+import { Link } from "react-router-dom";
 const { Header } = Layout;
 
 export default function AppHeader() {
@@ -73,14 +73,26 @@ export default function AppHeader() {
               gap: "30px", // Khoảng cách giữa các mục menu
             }}
           >
-            <Menu.Item key="1" style={{ color: "#212121", fontWeight: "600" }}>
-              Trang chủ
+            <Menu.Item key="1">
+              <Link to="/" style={{ color: "#212121", fontWeight: "500" }}>
+                Trang chủ
+              </Link>
             </Menu.Item>
-            <Menu.Item key="2" style={{ color: "#212121", fontWeight: "600" }}>
-              Hồ sơ
+            <Menu.Item key="2">
+              <Link
+                to="/profile"
+                style={{ color: "#212121", fontWeight: "500" }}
+              >
+                Hồ sơ
+              </Link>
             </Menu.Item>
-            <Menu.Item key="3" style={{ color: "#212121", fontWeight: "600" }}>
-              Cài đặt
+            <Menu.Item key="3">
+              <Link
+                to="/settings"
+                style={{ color: "#212121", fontWeight: "500" }}
+              >
+                Cài đặt
+              </Link>
             </Menu.Item>
           </Menu>
         </div>
