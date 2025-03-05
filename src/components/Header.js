@@ -111,10 +111,7 @@ export default function AppHeader() {
               key="1"
               icon={<HomeOutlined style={{ color: colors.primary }} />}
             >
-              <Link
-                to="/home"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
+              <Link to="/" style={{ color: colors.dark, fontWeight: "600" }}>
                 Trang Chủ
               </Link>
             </Menu.Item>
@@ -123,7 +120,7 @@ export default function AppHeader() {
               icon={<UserOutlined style={{ color: colors.primary }} />}
             >
               <Link
-                to="/patients-manager"
+                to="/patient-manager"
                 style={{ color: colors.dark, fontWeight: "600" }}
               >
                 Bệnh Nhân
