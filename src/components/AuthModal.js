@@ -2,18 +2,38 @@ import { useState } from "react";
 import { Modal, Form, Input, Button, message } from "antd";
 import { MedicineBoxOutlined } from "@ant-design/icons";
 import { ethers } from "ethers";
-import { useNavigate } from "react-router-dom"; // Thêm useNavigate
+import { useNavigate } from "react-router-dom";
 
 const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook để chuyển hướng
+  const navigate = useNavigate();
 
-  const contractAddress = "0xYourSmartContractAddress"; // Thay bằng địa chỉ thực
+  const contractAddress = "0xYourRealContractAddress"; // Thay bằng địa chỉ thật
   const contractABI = [
-    "function registerUser(string memory role) public",
-    "function loginUser() public view returns (bool)",
+    // ABI từ Remix sau khi deploy hợp đồng mới
+    {
+      inputs: [{ internalType: "string", name: "_role", type: "string" }],
+      name: "registerUser",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "address", name: "_user", type: "address" }],
+      name: "getUserRole",
+      outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "loginUser",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "view",
+      type: "function",
+    },
   ];
 
   const connectWallet = async () => {
@@ -24,6 +44,7 @@ const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
         const signer = provider.getSigner();
         return { provider, signer };
       } catch (error) {
+        console.error("Lỗi kết nối Metamask:", error);
         message.error("Không thể kết nối ví Metamask!");
         throw error;
       }
@@ -57,46 +78,44 @@ const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
 
   const handleLogin = async () => {
     setLoading(true);
+    console.log("Bắt đầu đăng nhập...");
     try {
       const { signer } = await connectWallet();
+      console.log("Đã kết nối Metamask");
       const contract = new ethers.Contract(
         contractAddress,
         contractABI,
         signer
       );
-      const messageToSign = "Xác thực đăng nhập MediChain";
-      const signature = await signer.signMessage(messageToSign);
-      const recoveredAddress = ethers.utils.verifyMessage(
-        messageToSign,
-        signature
-      );
+      console.log("Đã tạo instance hợp đồng:", contractAddress);
+
+      // Kiểm tra trước khi gọi loginUser
       const signerAddress = await signer.getAddress();
+      console.log("Địa chỉ người dùng:", signerAddress);
 
-      console.log("Signer Address:", signerAddress); // Kiểm tra địa chỉ
-      console.log("Recovered Address:", recoveredAddress); // Kiểm tra chữ ký
+      const isValid = await contract.loginUser();
+      console.log("Kết quả từ loginUser:", isValid);
 
-      if (recoveredAddress === signerAddress) {
-        const isValid = await contract.loginUser();
-        console.log("Is Valid User:", isValid); // Kiểm tra trạng thái trên Blockchain
-        if (isValid) {
-          localStorage.setItem("userAddress", signerAddress);
-          console.log(
-            "Stored userAddress:",
-            localStorage.getItem("userAddress")
-          ); // Kiểm tra localStorage
-          setIsLoggedIn(true);
-          message.success(`Đăng nhập thành công! Địa chỉ: ${signerAddress}`);
-          handleCancel();
-          navigate("/patient-manager"); // Chuyển hướng đến trang tài khoản
-        } else {
-          message.error("Bạn chưa đăng ký trên hệ thống!");
-        }
+      if (isValid) {
+        localStorage.setItem("userAddress", signerAddress);
+        console.log("Đã lưu userAddress:", localStorage.getItem("userAddress"));
+        setIsLoggedIn(true);
+        console.log("Đã gọi setIsLoggedIn(true)");
+        message.success(`Đăng nhập thành công! Địa chỉ: ${signerAddress}`);
+        handleCancel();
+        navigate("/patient-manager");
+        console.log("Đã chuyển hướng đến /patient-manager");
       } else {
-        message.error("Chữ ký không hợp lệ!");
+        message.error("Bạn chưa đăng ký trên hệ thống!");
+        console.log("Người dùng chưa đăng ký trên smart contract");
       }
     } catch (error) {
-      console.error("Lỗi đăng nhập:", error);
-      message.error("Đã xảy ra lỗi khi đăng nhập!");
+      console.error("Lỗi trong quá trình đăng nhập:", error);
+      if (error.code === "CALL_EXCEPTION" && error.reason) {
+        message.error(`Lỗi từ hợp đồng: ${error.reason}`);
+      } else {
+        message.error("Đã xảy ra lỗi khi đăng nhập!");
+      }
     }
     setLoading(false);
   };
