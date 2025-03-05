@@ -1,7 +1,18 @@
-export default function Footer() {
+import { Layout } from "antd";
+
+const { Footer } = Layout;
+
+export default function AppFooter() {
   return (
-    <footer className="bg-gray-900 text-white text-center p-4 mt-6">
-      <p>© 2025 MediChain. Bảo mật bằng Blockchain.</p>
-    </footer>
+    <Footer
+      style={{
+        textAlign: "center",
+        background: "#001529",
+        color: "white",
+        padding: "20px 0",
+      }}
+    >
+      MediChain ©{new Date().getFullYear()} Created by VT Game Studio
+    </Footer>
   );
 }

@@ -1,19 +1,16 @@
-import "./App.css";
+import { Layout } from "antd";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
+const { Content } = Layout;
+
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
+    <Layout style={{ minHeight: "100vh" }}>
       <Header />
-
-      {/* Main Content */}
-      <main className="flex-1 mt-16"></main>
-
-      {/* Footer */}
+      <Content style={{ flex: "1", marginTop: "64px" }}></Content>
       <Footer />
-    </div>
+    </Layout>
   );
 }
 

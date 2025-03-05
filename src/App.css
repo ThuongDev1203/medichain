@@ -36,3 +36,14 @@
     transform: rotate(360deg);
   }
 }
+
+.mobile-menu-button {
+  font-size: 18px;
+}
+
+/* Ẩn menu desktop trên mobile */
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none !important;
+  }
+}
