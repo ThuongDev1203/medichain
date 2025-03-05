@@ -1,0 +1,80 @@
+/* Định dạng chung */
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
+}
+
+/* Căn chỉnh các phần tử tìm kiếm */
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.search-container input {
+  flex: 1;
+  border-radius: 5px;
+}
+
+.search-container button {
+  border-radius: 5px;
+}
+
+/* Căn chỉnh header */
+.header-card {
+  display: flex;
+  align-items: center;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  background-color: #ffefd5;
+  gap: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-card img {
+  width: 200px;
+  height: auto;
+  margin-right: 20px;
+  max-width: 100%;
+}
+
+/* Hiển thị kết quả */
+.result-list {
+  width: 100%;
+}
+
+.result-card {
+  width: 100%;
+  border-radius: 8px;
+  background-color: #ffefd5;
+  transition: transform 0.2s;
+}
+
+/* Media Query cho điện thoại */
+@media (max-width: 768px) {
+  /* Chuyển toàn bộ layout sang dạng dọc */
+  .header-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header-card img {
+    margin-right: 0;
+    width: 150px;
+  }
+
+  .search-container {
+    flex-direction: column;
+  }
+
+  .search-container input,
+  .search-container button {
+    width: 100%;
+  }
+
+  .result-list {
+    display: block;
+  }
+}

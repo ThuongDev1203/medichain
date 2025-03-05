@@ -10,9 +10,9 @@ const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const contractAddress = "0xYourRealContractAddress"; // Thay bằng địa chỉ thật
+  // 🔹 Nhập địa chỉ hợp đồng thực
+  const contractAddress = "0xYourActualContractAddress"; // ⚠️ Cập nhật địa chỉ hợp đồng thực tế
   const contractABI = [
-    // ABI từ Remix sau khi deploy hợp đồng mới
     {
       inputs: [{ internalType: "string", name: "_role", type: "string" }],
       name: "registerUser",
@@ -36,24 +36,26 @@ const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
     },
   ];
 
+  // 🔹 Hàm kết nối Metamask
   const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        return { provider, signer };
-      } catch (error) {
-        console.error("Lỗi kết nối Metamask:", error);
-        message.error("Không thể kết nối ví Metamask!");
-        throw error;
-      }
-    } else {
+    if (!window.ethereum) {
       message.error("Vui lòng cài đặt Metamask!");
       throw new Error("Metamask not installed");
     }
+
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      return { provider, signer };
+    } catch (error) {
+      console.error("Lỗi kết nối Metamask:", error);
+      message.error("Không thể kết nối Metamask!");
+      throw error;
+    }
   };
 
+  // 🔹 Hàm Đăng ký
   const handleRegister = async (values) => {
     setLoading(true);
     try {
@@ -65,61 +67,56 @@ const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
       );
       const tx = await contract.registerUser(values.role);
       await tx.wait();
+
       const address = await signer.getAddress();
       message.success(`Đăng ký thành công! Địa chỉ: ${address}`);
       setIsRegister(false);
       form.resetFields();
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
-      message.error("Đăng ký thất bại!");
+      message.error("Đăng ký thất bại! Vui lòng thử lại.");
     }
     setLoading(false);
   };
 
+  // 🔹 Hàm Đăng nhập
   const handleLogin = async () => {
     setLoading(true);
     console.log("Bắt đầu đăng nhập...");
+
     try {
       const { signer } = await connectWallet();
-      console.log("Đã kết nối Metamask");
       const contract = new ethers.Contract(
         contractAddress,
         contractABI,
         signer
       );
-      console.log("Đã tạo instance hợp đồng:", contractAddress);
 
-      // Kiểm tra trước khi gọi loginUser
+      // Kiểm tra địa chỉ ví
       const signerAddress = await signer.getAddress();
       console.log("Địa chỉ người dùng:", signerAddress);
 
+      // Kiểm tra trạng thái đăng nhập từ hợp đồng
       const isValid = await contract.loginUser();
       console.log("Kết quả từ loginUser:", isValid);
 
       if (isValid) {
         localStorage.setItem("userAddress", signerAddress);
-        console.log("Đã lưu userAddress:", localStorage.getItem("userAddress"));
         setIsLoggedIn(true);
-        console.log("Đã gọi setIsLoggedIn(true)");
         message.success(`Đăng nhập thành công! Địa chỉ: ${signerAddress}`);
         handleCancel();
         navigate("/patient-manager");
-        console.log("Đã chuyển hướng đến /patient-manager");
       } else {
-        message.error("Bạn chưa đăng ký trên hệ thống!");
-        console.log("Người dùng chưa đăng ký trên smart contract");
+        message.warning("Bạn chưa đăng ký trên hệ thống!");
       }
     } catch (error) {
       console.error("Lỗi trong quá trình đăng nhập:", error);
-      if (error.code === "CALL_EXCEPTION" && error.reason) {
-        message.error(`Lỗi từ hợp đồng: ${error.reason}`);
-      } else {
-        message.error("Đã xảy ra lỗi khi đăng nhập!");
-      }
+      message.error("Đã xảy ra lỗi khi đăng nhập! Vui lòng thử lại.");
     }
     setLoading(false);
   };
 
+  // 🔹 Xử lý khi nhấn nút
   const onFinish = (values) => {
     if (isRegister) {
       handleRegister(values);

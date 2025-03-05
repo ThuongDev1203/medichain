@@ -139,6 +139,7 @@ export default function AppHeader() {
             fontSize: "26px",
             fontWeight: "bold",
             margin: 0,
+            fontFamily: "MuseoModerno, sans-serif",
           }}
           whileHover={{ color: colors.accent }}
         >

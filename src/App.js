@@ -1,4 +1,5 @@
 import { Layout } from "antd";
+import "./App.css";
 import {
   BrowserRouter as Router,
   Route,
