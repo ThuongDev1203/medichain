@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
-import { Layout, Menu, Button, Modal, Form, Input } from "antd";
-import { MenuOutlined, CloseOutlined, UserOutlined } from "@ant-design/icons";
-import { motion, AnimatePresence } from "framer-motion";
-import "./Header.css";
 import { Link } from "react-router-dom";
+import { Layout, Menu, Button, Modal, Form, Input } from "antd";
+import {
+  MenuOutlined,
+  CloseOutlined,
+  UserOutlined,
+  LockOutlined,
+  DatabaseOutlined,
+  MedicineBoxOutlined,
+  HomeOutlined, // Thêm icon cho Trang chủ
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
+
 const { Header } = Layout;
 
 export default function AppHeader() {
@@ -11,6 +19,15 @@ export default function AppHeader() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+
+  // Color Palette
+  const colors = {
+    orange: "#FF5722", // Deep orange
+    yellow: "#FFC107", // Amber yellow
+    black: "#212121", // Dark black/gray
+    white: "#FFFFFF", // Pure white
+    lightOrange: "#FFF3E0", // Light orange background
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,10 +46,14 @@ export default function AppHeader() {
     setIsModalOpen(false);
   };
 
+  const closeMobileMenu = () => {
+    setMenuOpen(false);
+  };
+
   return (
     <Header
       style={{
-        background: "white",
+        background: colors.white,
         padding: "0 20px",
         position: "fixed",
         width: "100%",
@@ -48,18 +69,21 @@ export default function AppHeader() {
       {/* Logo */}
       <motion.h1
         style={{
-          color: "#FF9800",
+          color: colors.orange,
           cursor: "pointer",
           fontSize: "26px",
           fontWeight: "bold",
           margin: 0,
+          display: "flex",
+          alignItems: "center",
         }}
-        whileHover={{ scale: 1.1, color: "#FFD700" }}
+        whileHover={{ scale: 1.1, color: colors.yellow }}
       >
+        <MedicineBoxOutlined style={{ marginRight: 10, color: colors.black }} />
         MediChain
       </motion.h1>
 
-      {/* Desktop Menu (Nằm ngang) */}
+      {/* Desktop Menu */}
       {!isMobile && (
         <div style={{ flex: 4, display: "flex", justifyContent: "flex-end" }}>
           <Menu
@@ -70,35 +94,58 @@ export default function AppHeader() {
               borderBottom: "none",
               display: "flex",
               justifyContent: "center",
-              gap: "30px", // Khoảng cách giữa các mục menu
+              gap: "30px",
             }}
           >
-            <Menu.Item key="1">
-              <Link to="/" style={{ color: "#212121", fontWeight: "500" }}>
-                Trang chủ
+            <Menu.Item
+              key="1"
+              icon={<HomeOutlined style={{ color: colors.orange }} />}
+            >
+              <Link
+                to="/home"
+                style={{ color: colors.black, fontWeight: "500" }}
+              >
+                Trang Chủ
               </Link>
             </Menu.Item>
-            <Menu.Item key="2">
+            <Menu.Item
+              key="2"
+              icon={<UserOutlined style={{ color: colors.orange }} />}
+            >
               <Link
-                to="/profile"
-                style={{ color: "#212121", fontWeight: "500" }}
+                to="/patients-manager"
+                style={{ color: colors.black, fontWeight: "500" }}
               >
-                Hồ sơ
+                Bệnh Nhân
               </Link>
             </Menu.Item>
-            <Menu.Item key="3">
+            <Menu.Item
+              key="3"
+              icon={<DatabaseOutlined style={{ color: colors.yellow }} />}
+            >
               <Link
-                to="/settings"
-                style={{ color: "#212121", fontWeight: "500" }}
+                to="/medical-records"
+                style={{ color: colors.black, fontWeight: "500" }}
               >
-                Cài đặt
+                Hồ Sơ Y Tế
+              </Link>
+            </Menu.Item>
+            <Menu.Item
+              key="4"
+              icon={<LockOutlined style={{ color: colors.black }} />}
+            >
+              <Link
+                to="/security"
+                style={{ color: colors.black, fontWeight: "500" }}
+              >
+                Bảo Mật
               </Link>
             </Menu.Item>
           </Menu>
         </div>
       )}
 
-      {/* Đăng nhập (Căn bên phải) */}
+      {/* Đăng nhập */}
       {!isMobile && (
         <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
           <Button
@@ -106,14 +153,14 @@ export default function AppHeader() {
             shape="round"
             icon={<UserOutlined />}
             style={{
-              background: "#FF9800",
+              background: colors.orange,
               border: "none",
               fontWeight: "600",
               fontFamily: "Poppins, sans-serif",
             }}
             onClick={() => showModal(false)}
           >
-            Đăng nhập
+            Đăng Nhập
           </Button>
         </div>
       )}
@@ -122,14 +169,14 @@ export default function AppHeader() {
       {isMobile && (
         <Button type="text" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? (
-            <CloseOutlined style={{ fontSize: "20px", color: "#FF9800" }} />
+            <CloseOutlined style={{ fontSize: "20px", color: colors.orange }} />
           ) : (
-            <MenuOutlined style={{ fontSize: "20px", color: "#FF9800" }} />
+            <MenuOutlined style={{ fontSize: "20px", color: colors.black }} />
           )}
         </Button>
       )}
 
-      {/* Mobile Menu (Dropdown) */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && isMobile && (
           <motion.div
@@ -141,7 +188,7 @@ export default function AppHeader() {
               top: "64px",
               left: 0,
               width: "100%",
-              background: "#FFF3E0",
+              background: colors.lightOrange,
               padding: "10px 0",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
               fontFamily: "Poppins, sans-serif",
@@ -154,37 +201,58 @@ export default function AppHeader() {
             >
               <Menu.Item
                 key="1"
-                style={{ color: "#212121", fontWeight: "500" }}
+                icon={<HomeOutlined style={{ color: colors.orange }} />}
+                onClick={closeMobileMenu}
               >
-                Trang chủ
+                <Link to="/home" style={{ color: colors.black }}>
+                  Trang Chủ
+                </Link>
               </Menu.Item>
               <Menu.Item
                 key="2"
-                style={{ color: "#212121", fontWeight: "500" }}
+                icon={<UserOutlined style={{ color: colors.orange }} />}
+                onClick={closeMobileMenu}
               >
-                Hồ sơ
+                <Link to="/patients" style={{ color: colors.black }}>
+                  Bệnh Nhân
+                </Link>
               </Menu.Item>
               <Menu.Item
                 key="3"
-                style={{ color: "#212121", fontWeight: "500" }}
+                icon={<DatabaseOutlined style={{ color: colors.yellow }} />}
+                onClick={closeMobileMenu}
               >
-                Cài đặt
+                <Link to="/medical-records" style={{ color: colors.black }}>
+                  Hồ Sơ Y Tế
+                </Link>
               </Menu.Item>
-              <Menu.Item key="4">
+              <Menu.Item
+                key="4"
+                icon={<LockOutlined style={{ color: colors.black }} />}
+                onClick={closeMobileMenu}
+              >
+                <Link to="/security" style={{ color: colors.black }}>
+                  Bảo Mật
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="5" onClick={closeMobileMenu}>
                 <Button
                   type="primary"
                   shape="round"
                   icon={<UserOutlined />}
                   block
                   style={{
-                    background: "#FF9800",
+                    background: colors.orange,
                     border: "none",
                     fontWeight: "600",
                     fontFamily: "Poppins, sans-serif",
                   }}
-                  onClick={() => showModal(false)}
+                  onClick={() => {
+                    showModal(false);
+                    closeMobileMenu();
+                  }}
                 >
-                  Đăng nhập
+                  Đăng Nhập
                 </Button>
               </Menu.Item>
             </Menu>
@@ -194,10 +262,11 @@ export default function AppHeader() {
 
       {/* Modal Đăng nhập / Đăng ký */}
       <Modal
-        title={isRegister ? "Đăng ký" : "Đăng nhập"}
+        title={isRegister ? "Đăng Ký Tài Khoản" : "Đăng Nhập Hệ Thống"}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
+        style={{ fontFamily: "Poppins, sans-serif" }}
       >
         <Form layout="vertical">
           <Form.Item
@@ -205,35 +274,65 @@ export default function AppHeader() {
             name="email"
             rules={[{ required: true, message: "Vui lòng nhập email!" }]}
           >
-            <Input placeholder="Nhập email của bạn" />
+            <Input
+              prefix={<UserOutlined style={{ color: colors.orange }} />}
+              placeholder="Nhập email của bạn"
+            />
           </Form.Item>
           <Form.Item
             label="Mật khẩu"
             name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
-            <Input.Password placeholder="Nhập mật khẩu của bạn" />
+            <Input.Password
+              prefix={<LockOutlined style={{ color: colors.black }} />}
+              placeholder="Nhập mật khẩu của bạn"
+            />
           </Form.Item>
           {isRegister && (
-            <Form.Item
-              label="Xác nhận mật khẩu"
-              name="confirmPassword"
-              rules={[
-                { required: true, message: "Vui lòng xác nhận mật khẩu!" },
-              ]}
-            >
-              <Input.Password placeholder="Nhập lại mật khẩu" />
-            </Form.Item>
+            <>
+              <Form.Item
+                label="Vai Trò"
+                name="role"
+                rules={[{ required: true, message: "Chọn vai trò của bạn" }]}
+              >
+                <Input
+                  prefix={
+                    <MedicineBoxOutlined style={{ color: colors.yellow }} />
+                  }
+                  placeholder="Bác sĩ / Nhân viên y tế"
+                />
+              </Form.Item>
+              <Form.Item
+                label="Xác nhận mật khẩu"
+                name="confirmPassword"
+                rules={[
+                  { required: true, message: "Vui lòng xác nhận mật khẩu!" },
+                ]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined style={{ color: colors.black }} />}
+                  placeholder="Nhập lại mật khẩu"
+                />
+              </Form.Item>
+            </>
           )}
-          <Button type="primary" block style={{ marginTop: "10px" }}>
-            {isRegister ? "Đăng ký" : "Đăng nhập"}
+          <Button
+            type="primary"
+            block
+            style={{
+              marginTop: "10px",
+              background: colors.orange,
+            }}
+          >
+            {isRegister ? "Đăng Ký" : "Đăng Nhập"}
           </Button>
           <p
             style={{
               textAlign: "center",
               marginTop: "10px",
               cursor: "pointer",
-              color: "#FF9800",
+              color: colors.black,
             }}
             onClick={() => setIsRegister(!isRegister)}
           >
