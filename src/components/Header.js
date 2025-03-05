@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout, Menu, Button, Modal, Form, Input } from "antd";
+import { Layout, Menu, Button } from "antd";
 import {
   MenuOutlined,
   CloseOutlined,
   UserOutlined,
   LockOutlined,
   DatabaseOutlined,
-  MedicineBoxOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthModal from "./AuthModal";
 
 const { Header } = Layout;
 
@@ -18,7 +18,6 @@ export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRegister, setIsRegister] = useState(false);
 
   // Color Palette
   const colors = {
@@ -37,8 +36,7 @@ export default function AppHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const showModal = (register) => {
-    setIsRegister(register);
+  const showModal = () => {
     setIsModalOpen(true);
   };
 
@@ -165,7 +163,7 @@ export default function AppHeader() {
               fontWeight: "600",
               fontFamily: "Poppins, sans-serif",
             }}
-            onClick={() => showModal(false)}
+            onClick={showModal}
           >
             Đăng Nhập
           </Button>
@@ -256,10 +254,7 @@ export default function AppHeader() {
                     fontWeight: "600",
                     fontFamily: "Poppins, sans-serif",
                   }}
-                  onClick={() => {
-                    showModal(false);
-                    closeMobileMenu();
-                  }}
+                  onClick={showModal}
                 >
                   Đăng Nhập
                 </Button>
@@ -270,87 +265,11 @@ export default function AppHeader() {
       </AnimatePresence>
 
       {/* Modal Đăng nhập / Đăng ký */}
-      <Modal
-        title={isRegister ? "Đăng Ký Tài Khoản" : "Đăng Nhập Hệ Thống"}
-        open={isModalOpen}
-        onCancel={handleCancel}
-        footer={null}
-        style={{ fontFamily: "Poppins, sans-serif" }}
-      >
-        <Form layout="vertical">
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: "Vui lòng nhập email!" }]}
-          >
-            <Input
-              prefix={<UserOutlined style={{ color: colors.primary }} />}
-              placeholder="Nhập email của bạn"
-            />
-          </Form.Item>
-          <Form.Item
-            label="Mật khẩu"
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined style={{ color: colors.dark }} />}
-              placeholder="Nhập mật khẩu của bạn"
-            />
-          </Form.Item>
-          {isRegister && (
-            <>
-              <Form.Item
-                label="Vai Trò"
-                name="role"
-                rules={[{ required: true, message: "Chọn vai trò của bạn" }]}
-              >
-                <Input
-                  prefix={
-                    <MedicineBoxOutlined style={{ color: colors.accent }} />
-                  }
-                  placeholder="Bác sĩ / Nhân viên y tế"
-                />
-              </Form.Item>
-              <Form.Item
-                label="Xác nhận mật khẩu"
-                name="confirmPassword"
-                rules={[
-                  { required: true, message: "Vui lòng xác nhận mật khẩu!" },
-                ]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined style={{ color: colors.dark }} />}
-                  placeholder="Nhập lại mật khẩu"
-                />
-              </Form.Item>
-            </>
-          )}
-          <Button
-            type="primary"
-            block
-            style={{
-              marginTop: "10px",
-              background: colors.primary,
-            }}
-          >
-            {isRegister ? "Đăng Ký" : "Đăng Nhập"}
-          </Button>
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "10px",
-              cursor: "pointer",
-              color: colors.dark,
-            }}
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister
-              ? "Đã có tài khoản? Đăng nhập"
-              : "Chưa có tài khoản? Đăng ký"}
-          </p>
-        </Form>
-      </Modal>
+      <AuthModal
+        isModalOpen={isModalOpen}
+        handleCancel={handleCancel}
+        colors={colors}
+      />
     </Header>
   );
 }

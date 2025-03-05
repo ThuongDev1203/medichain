@@ -19,7 +19,7 @@ export default function HomePage() {
     { name: "Loperamide", use: "Điều trị tiêu chảy" },
   ];
 
-  // Xử lý tìm kiếm thuốc trong danh sách mẫu
+  // Xử lý tìm kiếm thuốc
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setLoading(true);
@@ -33,28 +33,30 @@ export default function HomePage() {
       setResults(foundMedicine);
       setLoading(false);
     } else {
-      // Nếu không có trong danh sách, sử dụng OpenAI API
+      // Sử dụng OpenFDA API để tìm kiếm thông tin thuốc
       try {
-        const response = await axios.post(
-          "https://api.openai.com/v1/completions",
-          {
-            model: "gpt-3.5-turbo",
-            prompt: `Tìm kiếm thông tin thuốc: ${searchTerm}`,
-            max_tokens: 100,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer YOUR_OPENAI_API_KEY`, // Thay bằng API key của bạn
-            },
-          }
+        const response = await axios.get(
+          `https://api.fda.gov/drug/label.json?search=openfda.brand_name:${searchTerm}&limit=1`
         );
 
-        setResults([
-          { name: searchTerm, use: response.data.choices[0].text.trim() },
-        ]);
+        if (response.data.results && response.data.results.length > 0) {
+          const drug = response.data.results[0];
+          const drugInfo = {
+            name: drug.openfda.brand_name?.[0] || searchTerm,
+            use:
+              drug.indications_and_usage?.[0] || "Không có thông tin chi tiết.",
+          };
+          setResults([drugInfo]);
+        } else {
+          setResults([
+            {
+              name: searchTerm,
+              use: "Không tìm thấy thông tin trong OpenFDA.",
+            },
+          ]);
+        }
       } catch (error) {
-        console.error("Lỗi tìm kiếm AI:", error);
+        console.error("Lỗi tìm kiếm từ OpenFDA API:", error);
         setResults([{ name: searchTerm, use: "Không tìm thấy thông tin." }]);
       }
       setLoading(false);
