@@ -8,7 +8,7 @@ import {
   LockOutlined,
   DatabaseOutlined,
   MedicineBoxOutlined,
-  HomeOutlined, // Thêm icon cho Trang chủ
+  HomeOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,11 +22,11 @@ export default function AppHeader() {
 
   // Color Palette
   const colors = {
-    orange: "#FF5722", // Deep orange
-    yellow: "#FFC107", // Amber yellow
-    black: "#212121", // Dark black/gray
-    white: "#FFFFFF", // Pure white
-    lightOrange: "#FFF3E0", // Light orange background
+    primary: "#FF9800", // Orange
+    secondary: "#4CAF50", // Green
+    dark: "#212121", // Dark gray
+    light: "#FAFAFA", // Light gray
+    accent: "#FFC107", // Amber
   };
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function AppHeader() {
   return (
     <Header
       style={{
-        background: colors.white,
+        background: colors.light,
         padding: "0 20px",
         position: "fixed",
         width: "100%",
@@ -67,21 +67,31 @@ export default function AppHeader() {
       }}
     >
       {/* Logo */}
-      <motion.h1
+      <motion.div
         style={{
-          color: colors.orange,
-          cursor: "pointer",
-          fontSize: "26px",
-          fontWeight: "bold",
-          margin: 0,
           display: "flex",
           alignItems: "center",
+          cursor: "pointer",
         }}
-        whileHover={{ scale: 1.1, color: colors.yellow }}
+        whileHover={{ scale: 1.1 }}
       >
-        <MedicineBoxOutlined style={{ marginRight: 10, color: colors.black }} />
-        MediChain
-      </motion.h1>
+        <img
+          src="/logoweb.png"
+          alt=""
+          style={{ height: "40px", marginRight: "10px" }}
+        />
+        <motion.h1
+          style={{
+            color: colors.primary,
+            fontSize: "26px",
+            fontWeight: "bold",
+            margin: 0,
+          }}
+          whileHover={{ color: colors.accent }}
+        >
+          MediChain
+        </motion.h1>
+      </motion.div>
 
       {/* Desktop Menu */}
       {!isMobile && (
@@ -99,44 +109,44 @@ export default function AppHeader() {
           >
             <Menu.Item
               key="1"
-              icon={<HomeOutlined style={{ color: colors.orange }} />}
+              icon={<HomeOutlined style={{ color: colors.primary }} />}
             >
               <Link
                 to="/home"
-                style={{ color: colors.black, fontWeight: "500" }}
+                style={{ color: colors.dark, fontWeight: "600" }}
               >
                 Trang Chủ
               </Link>
             </Menu.Item>
             <Menu.Item
               key="2"
-              icon={<UserOutlined style={{ color: colors.orange }} />}
+              icon={<UserOutlined style={{ color: colors.primary }} />}
             >
               <Link
                 to="/patients-manager"
-                style={{ color: colors.black, fontWeight: "500" }}
+                style={{ color: colors.dark, fontWeight: "600" }}
               >
                 Bệnh Nhân
               </Link>
             </Menu.Item>
             <Menu.Item
               key="3"
-              icon={<DatabaseOutlined style={{ color: colors.yellow }} />}
+              icon={<DatabaseOutlined style={{ color: colors.primary }} />}
             >
               <Link
                 to="/medical-records"
-                style={{ color: colors.black, fontWeight: "500" }}
+                style={{ color: colors.dark, fontWeight: "600" }}
               >
                 Hồ Sơ Y Tế
               </Link>
             </Menu.Item>
             <Menu.Item
               key="4"
-              icon={<LockOutlined style={{ color: colors.black }} />}
+              icon={<LockOutlined style={{ color: colors.primary }} />}
             >
               <Link
                 to="/security"
-                style={{ color: colors.black, fontWeight: "500" }}
+                style={{ color: colors.dark, fontWeight: "600" }}
               >
                 Bảo Mật
               </Link>
@@ -153,7 +163,7 @@ export default function AppHeader() {
             shape="round"
             icon={<UserOutlined />}
             style={{
-              background: colors.orange,
+              background: colors.primary,
               border: "none",
               fontWeight: "600",
               fontFamily: "Poppins, sans-serif",
@@ -169,9 +179,11 @@ export default function AppHeader() {
       {isMobile && (
         <Button type="text" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? (
-            <CloseOutlined style={{ fontSize: "20px", color: colors.orange }} />
+            <CloseOutlined
+              style={{ fontSize: "20px", color: colors.primary }}
+            />
           ) : (
-            <MenuOutlined style={{ fontSize: "20px", color: colors.black }} />
+            <MenuOutlined style={{ fontSize: "20px", color: colors.dark }} />
           )}
         </Button>
       )}
@@ -188,7 +200,7 @@ export default function AppHeader() {
               top: "64px",
               left: 0,
               width: "100%",
-              background: colors.lightOrange,
+              background: colors.light,
               padding: "10px 0",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
               fontFamily: "Poppins, sans-serif",
@@ -201,37 +213,37 @@ export default function AppHeader() {
             >
               <Menu.Item
                 key="1"
-                icon={<HomeOutlined style={{ color: colors.orange }} />}
+                icon={<HomeOutlined style={{ color: colors.primary }} />}
                 onClick={closeMobileMenu}
               >
-                <Link to="/home" style={{ color: colors.black }}>
+                <Link to="/home" style={{ color: colors.dark }}>
                   Trang Chủ
                 </Link>
               </Menu.Item>
               <Menu.Item
                 key="2"
-                icon={<UserOutlined style={{ color: colors.orange }} />}
+                icon={<UserOutlined style={{ color: colors.primary }} />}
                 onClick={closeMobileMenu}
               >
-                <Link to="/patients" style={{ color: colors.black }}>
+                <Link to="/patients" style={{ color: colors.dark }}>
                   Bệnh Nhân
                 </Link>
               </Menu.Item>
               <Menu.Item
                 key="3"
-                icon={<DatabaseOutlined style={{ color: colors.yellow }} />}
+                icon={<DatabaseOutlined style={{ color: colors.accent }} />}
                 onClick={closeMobileMenu}
               >
-                <Link to="/medical-records" style={{ color: colors.black }}>
+                <Link to="/medical-records" style={{ color: colors.dark }}>
                   Hồ Sơ Y Tế
                 </Link>
               </Menu.Item>
               <Menu.Item
                 key="4"
-                icon={<LockOutlined style={{ color: colors.black }} />}
+                icon={<LockOutlined style={{ color: colors.dark }} />}
                 onClick={closeMobileMenu}
               >
-                <Link to="/security" style={{ color: colors.black }}>
+                <Link to="/security" style={{ color: colors.dark }}>
                   Bảo Mật
                 </Link>
               </Menu.Item>
@@ -242,7 +254,7 @@ export default function AppHeader() {
                   icon={<UserOutlined />}
                   block
                   style={{
-                    background: colors.orange,
+                    background: colors.primary,
                     border: "none",
                     fontWeight: "600",
                     fontFamily: "Poppins, sans-serif",
@@ -275,7 +287,7 @@ export default function AppHeader() {
             rules={[{ required: true, message: "Vui lòng nhập email!" }]}
           >
             <Input
-              prefix={<UserOutlined style={{ color: colors.orange }} />}
+              prefix={<UserOutlined style={{ color: colors.primary }} />}
               placeholder="Nhập email của bạn"
             />
           </Form.Item>
@@ -285,7 +297,7 @@ export default function AppHeader() {
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
-              prefix={<LockOutlined style={{ color: colors.black }} />}
+              prefix={<LockOutlined style={{ color: colors.dark }} />}
               placeholder="Nhập mật khẩu của bạn"
             />
           </Form.Item>
@@ -298,7 +310,7 @@ export default function AppHeader() {
               >
                 <Input
                   prefix={
-                    <MedicineBoxOutlined style={{ color: colors.yellow }} />
+                    <MedicineBoxOutlined style={{ color: colors.accent }} />
                   }
                   placeholder="Bác sĩ / Nhân viên y tế"
                 />
@@ -311,7 +323,7 @@ export default function AppHeader() {
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: colors.black }} />}
+                  prefix={<LockOutlined style={{ color: colors.dark }} />}
                   placeholder="Nhập lại mật khẩu"
                 />
               </Form.Item>
@@ -322,7 +334,7 @@ export default function AppHeader() {
             block
             style={{
               marginTop: "10px",
-              background: colors.orange,
+              background: colors.primary,
             }}
           >
             {isRegister ? "Đăng Ký" : "Đăng Nhập"}
@@ -332,7 +344,7 @@ export default function AppHeader() {
               textAlign: "center",
               marginTop: "10px",
               cursor: "pointer",
-              color: colors.black,
+              color: colors.dark,
             }}
             onClick={() => setIsRegister(!isRegister)}
           >
