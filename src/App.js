@@ -16,8 +16,8 @@ function App() {
         <Content style={{ flex: 1, marginTop: "64px", padding: "20px" }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/patient-manager" element={<PatientManagerPage />} />
-            <Route path="/medical-records" element={<MedicalRecordsPage />} />
+            <Route path="/patientmanager" element={<PatientManagerPage />} />
+            <Route path="/medicalrecords" element={<MedicalRecordsPage />} />
             <Route path="/security" element={<SecurityPage />} />
           </Routes>
         </Content>
