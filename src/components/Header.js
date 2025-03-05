@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout, Menu, Button } from "antd";
+import { Layout, Menu, Button, message } from "antd"; // Thêm 'message' vào import
 import {
   MenuOutlined,
   CloseOutlined,
@@ -18,14 +18,16 @@ export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("userAddress")
+  );
 
-  // Color Palette
   const colors = {
-    primary: "#FF9800", // Orange
-    secondary: "#4CAF50", // Green
-    dark: "#212121", // Dark gray
-    light: "#FAFAFA", // Light gray
-    accent: "#FFC107", // Amber
+    primary: "#FF9800",
+    secondary: "#4CAF50",
+    dark: "#212121",
+    light: "#FAFAFA",
+    accent: "#FFC107",
   };
 
   useEffect(() => {
@@ -48,6 +50,64 @@ export default function AppHeader() {
     setMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("userAddress");
+    setIsLoggedIn(false);
+    message.success("Đã đăng xuất!"); // Dòng này cần 'message' từ antd
+  };
+
+  const menuItems = [
+    {
+      key: "1",
+      icon: <HomeOutlined style={{ color: colors.primary }} />,
+      label: (
+        <Link to="/" style={{ color: colors.dark, fontWeight: "600" }}>
+          Trang Chủ
+        </Link>
+      ),
+    },
+    ...(isLoggedIn
+      ? [
+          {
+            key: "2",
+            icon: <UserOutlined style={{ color: colors.primary }} />,
+            label: (
+              <Link
+                to="/patient-manager"
+                style={{ color: colors.dark, fontWeight: "600" }}
+              >
+                Bệnh Nhân
+              </Link>
+            ),
+          },
+          {
+            key: "3",
+            icon: <DatabaseOutlined style={{ color: colors.primary }} />,
+            label: (
+              <Link
+                to="/medical-records"
+                style={{ color: colors.dark, fontWeight: "600" }}
+              >
+                Hồ Sơ Y Tế
+              </Link>
+            ),
+          },
+          {
+            key: "4",
+            icon: <LockOutlined style={{ color: colors.primary }} />,
+            label: (
+              <Link
+                to="/security"
+                style={{ color: colors.dark, fontWeight: "600" }}
+              >
+                Bảo Mật
+              </Link>
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <Header
       style={{
@@ -64,13 +124,8 @@ export default function AppHeader() {
         fontFamily: "Poppins, sans-serif",
       }}
     >
-      {/* Logo */}
       <motion.div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          cursor: "pointer",
-        }}
+        style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         whileHover={{ scale: 1.1 }}
       >
         <img
@@ -91,7 +146,6 @@ export default function AppHeader() {
         </motion.h1>
       </motion.div>
 
-      {/* Desktop Menu */}
       {!isMobile && (
         <div style={{ flex: 4, display: "flex", justifyContent: "flex-end" }}>
           <Menu
@@ -104,73 +158,44 @@ export default function AppHeader() {
               justifyContent: "center",
               gap: "30px",
             }}
-          >
-            <Menu.Item
-              key="1"
-              icon={<HomeOutlined style={{ color: colors.primary }} />}
-            >
-              <Link to="/" style={{ color: colors.dark, fontWeight: "600" }}>
-                Trang Chủ
-              </Link>
-            </Menu.Item>
-            <Menu.Item
-              key="2"
-              icon={<UserOutlined style={{ color: colors.primary }} />}
-            >
-              <Link
-                to="/patient-manager"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Bệnh Nhân
-              </Link>
-            </Menu.Item>
-            <Menu.Item
-              key="3"
-              icon={<DatabaseOutlined style={{ color: colors.primary }} />}
-            >
-              <Link
-                to="/medical-records"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Hồ Sơ Y Tế
-              </Link>
-            </Menu.Item>
-            <Menu.Item
-              key="4"
-              icon={<LockOutlined style={{ color: colors.primary }} />}
-            >
-              <Link
-                to="/security"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Bảo Mật
-              </Link>
-            </Menu.Item>
-          </Menu>
+            items={menuItems}
+          />
         </div>
       )}
 
-      {/* Đăng nhập */}
       {!isMobile && (
         <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            type="primary"
-            shape="round"
-            icon={<UserOutlined />}
-            style={{
-              background: colors.primary,
-              border: "none",
-              fontWeight: "600",
-              fontFamily: "Poppins, sans-serif",
-            }}
-            onClick={showModal}
-          >
-            Đăng Nhập
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              type="primary"
+              shape="round"
+              onClick={handleLogout}
+              style={{
+                background: colors.primary,
+                border: "none",
+                fontWeight: "600",
+              }}
+            >
+              Đăng Xuất
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              shape="round"
+              icon={<UserOutlined />}
+              style={{
+                background: colors.primary,
+                border: "none",
+                fontWeight: "600",
+              }}
+              onClick={showModal}
+            >
+              Đăng Nhập
+            </Button>
+          )}
         </div>
       )}
 
-      {/* Mobile Menu Button */}
       {isMobile && (
         <Button type="text" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? (
@@ -183,7 +208,6 @@ export default function AppHeader() {
         </Button>
       )}
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && isMobile && (
           <motion.div
@@ -198,7 +222,6 @@ export default function AppHeader() {
               background: colors.light,
               padding: "10px 0",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              fontFamily: "Poppins, sans-serif",
             }}
           >
             <Menu
@@ -206,69 +229,49 @@ export default function AppHeader() {
               selectable={false}
               style={{ background: "transparent" }}
             >
-              <Menu.Item
-                key="1"
-                icon={<HomeOutlined style={{ color: colors.primary }} />}
-                onClick={closeMobileMenu}
-              >
-                <Link to="/home" style={{ color: colors.dark }}>
-                  Trang Chủ
-                </Link>
-              </Menu.Item>
-              <Menu.Item
-                key="2"
-                icon={<UserOutlined style={{ color: colors.primary }} />}
-                onClick={closeMobileMenu}
-              >
-                <Link to="/patients" style={{ color: colors.dark }}>
-                  Bệnh Nhân
-                </Link>
-              </Menu.Item>
-              <Menu.Item
-                key="3"
-                icon={<DatabaseOutlined style={{ color: colors.accent }} />}
-                onClick={closeMobileMenu}
-              >
-                <Link to="/medical-records" style={{ color: colors.dark }}>
-                  Hồ Sơ Y Tế
-                </Link>
-              </Menu.Item>
-              <Menu.Item
-                key="4"
-                icon={<LockOutlined style={{ color: colors.dark }} />}
-                onClick={closeMobileMenu}
-              >
-                <Link to="/security" style={{ color: colors.dark }}>
-                  Bảo Mật
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="5" onClick={closeMobileMenu}>
-                <Button
-                  type="primary"
-                  shape="round"
-                  icon={<UserOutlined />}
-                  block
-                  style={{
-                    background: colors.primary,
-                    border: "none",
-                    fontWeight: "600",
-                    fontFamily: "Poppins, sans-serif",
-                  }}
-                  onClick={showModal}
+              {menuItems.map((item) => (
+                <Menu.Item
+                  key={item.key}
+                  icon={item.icon}
+                  onClick={closeMobileMenu}
                 >
-                  Đăng Nhập
-                </Button>
+                  {item.label}
+                </Menu.Item>
+              ))}
+              <Menu.Item key="5" onClick={closeMobileMenu}>
+                {isLoggedIn ? (
+                  <Button
+                    type="primary"
+                    shape="round"
+                    block
+                    onClick={handleLogout}
+                    style={{ background: colors.primary, border: "none" }}
+                  >
+                    Đăng Xuất
+                  </Button>
+                ) : (
+                  <Button
+                    type="primary"
+                    shape="round"
+                    icon={<UserOutlined />}
+                    block
+                    style={{ background: colors.primary, border: "none" }}
+                    onClick={showModal}
+                  >
+                    Đăng Nhập
+                  </Button>
+                )}
               </Menu.Item>
             </Menu>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Modal Đăng nhập / Đăng ký */}
       <AuthModal
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         colors={colors}
+        setIsLoggedIn={setIsLoggedIn}
       />
     </Header>
   );

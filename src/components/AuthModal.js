@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Modal, Form, Input, Button, message } from "antd";
-import { MedicineBoxOutlined } from "@ant-design/icons"; // Chỉ giữ icon cần dùng
+import { MedicineBoxOutlined } from "@ant-design/icons";
 import { ethers } from "ethers";
+import { useNavigate } from "react-router-dom"; // Thêm useNavigate
 
-const AuthModal = ({ isModalOpen, handleCancel, colors }) => {
+const AuthModal = ({ isModalOpen, handleCancel, colors, setIsLoggedIn }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Hook để chuyển hướng
 
   const contractAddress = "0xYourSmartContractAddress"; // Thay bằng địa chỉ thực
   const contractABI = [
@@ -64,19 +66,28 @@ const AuthModal = ({ isModalOpen, handleCancel, colors }) => {
       );
       const messageToSign = "Xác thực đăng nhập MediChain";
       const signature = await signer.signMessage(messageToSign);
-
-      // Sử dụng signature để xác minh (giả lập gửi lên server hoặc contract)
       const recoveredAddress = ethers.utils.verifyMessage(
         messageToSign,
         signature
       );
       const signerAddress = await signer.getAddress();
+
+      console.log("Signer Address:", signerAddress); // Kiểm tra địa chỉ
+      console.log("Recovered Address:", recoveredAddress); // Kiểm tra chữ ký
+
       if (recoveredAddress === signerAddress) {
         const isValid = await contract.loginUser();
+        console.log("Is Valid User:", isValid); // Kiểm tra trạng thái trên Blockchain
         if (isValid) {
           localStorage.setItem("userAddress", signerAddress);
+          console.log(
+            "Stored userAddress:",
+            localStorage.getItem("userAddress")
+          ); // Kiểm tra localStorage
+          setIsLoggedIn(true);
           message.success(`Đăng nhập thành công! Địa chỉ: ${signerAddress}`);
           handleCancel();
+          navigate("/patient-manager"); // Chuyển hướng đến trang tài khoản
         } else {
           message.error("Bạn chưa đăng ký trên hệ thống!");
         }
