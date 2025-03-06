@@ -1,64 +1,51 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout, Menu, Button, message } from "antd"; // Thêm 'message' vào import
+import { Layout, Menu, Button, message, Typography } from "antd";
 import {
-  MenuOutlined,
-  CloseOutlined,
   UserOutlined,
   LockOutlined,
   DatabaseOutlined,
   HomeOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import AuthModal from "./AuthModal";
 
 const { Header } = Layout;
+const { Text } = Typography;
 
 export default function AppHeader() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("userAddress")
+  const [userAddress, setUserAddress] = useState(
+    localStorage.getItem("userAddress") || null
   );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const colors = {
     primary: "#FF9800",
-    secondary: "#4CAF50",
     dark: "#212121",
     light: "#FAFAFA",
     accent: "#FFC107",
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const closeMobileMenu = () => {
-    setMenuOpen(false);
-  };
+  const showModal = () => setIsModalOpen(true);
+  const handleCancel = () => setIsModalOpen(false);
 
   const handleLogout = () => {
     localStorage.removeItem("userAddress");
-    setIsLoggedIn(false);
-    message.success("Đã đăng xuất!"); // Dòng này cần 'message' từ antd
+    setUserAddress(null);
+    message.success("Đã đăng xuất!");
   };
 
   const menuItems = [
     {
-      key: "1",
+      key: "home",
       icon: <HomeOutlined style={{ color: colors.primary }} />,
       label: (
         <Link to="/" style={{ color: colors.dark, fontWeight: "600" }}>
@@ -66,10 +53,10 @@ export default function AppHeader() {
         </Link>
       ),
     },
-    ...(isLoggedIn
+    ...(userAddress
       ? [
           {
-            key: "2",
+            key: "patients",
             icon: <UserOutlined style={{ color: colors.primary }} />,
             label: (
               <Link
@@ -81,7 +68,7 @@ export default function AppHeader() {
             ),
           },
           {
-            key: "3",
+            key: "records",
             icon: <DatabaseOutlined style={{ color: colors.primary }} />,
             label: (
               <Link
@@ -93,7 +80,7 @@ export default function AppHeader() {
             ),
           },
           {
-            key: "4",
+            key: "security",
             icon: <LockOutlined style={{ color: colors.primary }} />,
             label: (
               <Link
@@ -124,13 +111,14 @@ export default function AppHeader() {
         fontFamily: "Poppins, sans-serif",
       }}
     >
+      {/* Logo */}
       <motion.div
         style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         whileHover={{ scale: 1.1 }}
       >
         <img
           src="/logoweb.png"
-          alt=""
+          alt="Logo"
           style={{ height: "40px", marginRight: "10px" }}
         />
         <motion.h1
@@ -147,132 +135,69 @@ export default function AppHeader() {
         </motion.h1>
       </motion.div>
 
-      {!isMobile && (
-        <div style={{ flex: 4, display: "flex", justifyContent: "flex-end" }}>
-          <Menu
-            mode="horizontal"
-            defaultSelectedKeys={["1"]}
-            style={{
-              background: "transparent",
-              borderBottom: "none",
-              display: "flex",
-              justifyContent: "center",
-              gap: "30px",
-            }}
-            items={menuItems}
-          />
-        </div>
-      )}
+      {/* Menu */}
+      <Menu
+        mode="horizontal"
+        defaultSelectedKeys={["home"]}
+        style={{
+          background: "transparent",
+          borderBottom: "none",
+          flex: 1,
+          justifyContent: "center",
+          display: "flex",
+          gap: "30px",
+        }}
+        items={menuItems}
+      />
 
-      {!isMobile && (
-        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-          {isLoggedIn ? (
-            <Button
-              type="primary"
-              shape="round"
-              onClick={handleLogout}
-              style={{
-                background: colors.primary,
-                border: "none",
-                fontWeight: "600",
-              }}
-            >
-              Đăng Xuất
+      {/* Hiển thị địa chỉ ví & nút đăng nhập/đăng xuất */}
+      <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+        {userAddress ? (
+          <>
+            <Button shape="round" type="default">
+              <UserOutlined style={{ marginRight: 8 }} />
+              <Text style={{ fontSize: "12px" }}>
+                {userAddress.slice(0, 6) + "..." + userAddress.slice(-4)}
+              </Text>
             </Button>
-          ) : (
-            <Button
-              type="primary"
-              shape="round"
-              icon={<UserOutlined />}
-              style={{
-                background: colors.primary,
-                border: "none",
-                fontWeight: "600",
-              }}
-              onClick={showModal}
-            >
-              Đăng Nhập
-            </Button>
-          )}
-        </div>
-      )}
-
-      {isMobile && (
-        <Button type="text" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? (
-            <CloseOutlined
-              style={{ fontSize: "20px", color: colors.primary }}
-            />
-          ) : (
-            <MenuOutlined style={{ fontSize: "20px", color: colors.dark }} />
-          )}
-        </Button>
-      )}
-
-      <AnimatePresence>
-        {menuOpen && isMobile && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            {!isMobile && (
+              <Button
+                type="default"
+                shape="round"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+              >
+                Đăng Xuất
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button
+            type="primary"
+            shape="round"
+            icon={<UserOutlined />}
             style={{
-              position: "absolute",
-              top: "64px",
-              left: 0,
-              width: "100%",
-              background: colors.light,
-              padding: "10px 0",
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              background: colors.primary,
+              border: "none",
+              fontWeight: "600",
             }}
+            onClick={showModal}
           >
-            <Menu
-              mode="vertical"
-              selectable={false}
-              style={{ background: "transparent" }}
-            >
-              {menuItems.map((item) => (
-                <Menu.Item
-                  key={item.key}
-                  icon={item.icon}
-                  onClick={closeMobileMenu}
-                >
-                  {item.label}
-                </Menu.Item>
-              ))}
-              <Menu.Item key="5" onClick={closeMobileMenu}>
-                {isLoggedIn ? (
-                  <Button
-                    type="primary"
-                    shape="round"
-                    block
-                    onClick={handleLogout}
-                    style={{ background: colors.primary, border: "none" }}
-                  >
-                    Đăng Xuất
-                  </Button>
-                ) : (
-                  <Button
-                    type="primary"
-                    shape="round"
-                    icon={<UserOutlined />}
-                    block
-                    style={{ background: colors.primary, border: "none" }}
-                    onClick={showModal}
-                  >
-                    Đăng Nhập
-                  </Button>
-                )}
-              </Menu.Item>
-            </Menu>
-          </motion.div>
+            Đăng Nhập
+          </Button>
         )}
-      </AnimatePresence>
+      </div>
 
+      {/* Modal đăng nhập */}
       <AuthModal
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
-        colors={colors}
-        setIsLoggedIn={setIsLoggedIn}
+        setIsLoggedIn={(status) => {
+          if (status) {
+            const savedAddress = localStorage.getItem("userAddress");
+            setUserAddress(savedAddress);
+          }
+        }}
       />
     </Header>
   );

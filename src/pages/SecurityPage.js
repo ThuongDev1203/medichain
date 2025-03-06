@@ -1,125 +1,188 @@
 import { useState } from "react";
-import { Input, Button, Card, Typography, Switch, message } from "antd";
-import { LockOutlined, KeyOutlined, SafetyOutlined } from "@ant-design/icons";
-import axios from "axios";
+import {
+  Input,
+  Button,
+  Card,
+  Typography,
+  Upload,
+  Switch,
+  message,
+  Avatar,
+} from "antd";
+import {
+  UploadOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  HomeOutlined,
+  SolutionOutlined,
+} from "@ant-design/icons";
+import { ethers } from "ethers";
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 export default function SecurityPage() {
-  const [privateKey, setPrivateKey] = useState("");
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+    address: "",
+    avatar: "/user.png",
+  });
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
-  const [accessStatus, setAccessStatus] = useState("Chưa xác thực");
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Giả lập Blockchain API (thay bằng API thực tế trong dự án)
-  const blockchainAPI = "http://localhost:3001/blockchain-auth";
+  // Xử lý thay đổi thông tin cá nhân
+  const handleChange = (key, value) => {
+    setUserData({ ...userData, [key]: value });
+  };
 
-  // Xác thực bằng khóa riêng
-  const handleLoginWithPrivateKey = async () => {
-    if (!privateKey.trim()) {
-      message.error("Vui lòng nhập khóa riêng!");
+  // Xử lý tải lên ảnh đại diện
+  const handleUpload = (info) => {
+    if (info.file.status === "done" || info.file.originFileObj) {
+      const avatarURL = URL.createObjectURL(info.file.originFileObj);
+      setUserData({ ...userData, avatar: avatarURL });
+      message.success("Ảnh đại diện đã được cập nhật!");
+    }
+  };
+
+  // Xác thực bằng MetaMask
+  const handleLoginWithWallet = async () => {
+    if (!window.ethereum) {
+      message.error("Vui lòng cài đặt MetaMask để sử dụng tính năng này!");
       return;
     }
     setLoading(true);
     try {
-      // Giả lập gọi API Blockchain để xác thực
-      const response = await axios.post(blockchainAPI, { privateKey });
-      if (response.data.success) {
-        setAccessStatus("Đã xác thực - Quyền truy cập hồ sơ được cấp");
-        message.success("Đăng nhập thành công!");
-      } else {
-        setAccessStatus("Xác thực thất bại");
-        message.error("Khóa riêng không hợp lệ!");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const userAddress = accounts[0];
+      if (userAddress) {
+        message.success("Xác thực thành công!");
       }
     } catch (error) {
-      console.error("Lỗi xác thực:", error);
-      setAccessStatus("Lỗi hệ thống");
-      message.error("Đã xảy ra lỗi khi xác thực!");
+      message.error("Xác thực thất bại!");
     }
     setLoading(false);
   };
 
-  // Kích hoạt/tắt 2FA
-  const toggle2FA = () => {
-    setIs2FAEnabled(!is2FAEnabled);
-    message.info(`Xác thực 2 yếu tố đã ${!is2FAEnabled ? "bật" : "tắt"}`);
-  };
-
-  // Lưu khóa riêng (giả lập, thực tế cần mã hóa)
-  const savePrivateKey = () => {
-    if (!privateKey.trim()) {
-      message.error("Vui lòng nhập khóa riêng để lưu!");
-      return;
-    }
-    localStorage.setItem("encryptedPrivateKey", btoa(privateKey)); // Mã hóa đơn giản bằng base64
-    message.success("Khóa riêng đã được lưu an toàn!");
-  };
-
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
       <Title level={2} style={{ textAlign: "center" }}>
         🔒 Bảo Mật Tài Khoản
       </Title>
-      <Paragraph style={{ textAlign: "center" }}>
-        Quản lý bảo mật tài khoản của bạn trong hệ thống Blockchain y tế
-      </Paragraph>
 
-      {/* Đăng nhập bằng khóa riêng */}
-      <Card title="Đăng Nhập Bằng Khóa Riêng" style={{ marginBottom: "20px" }}>
-        <Input
-          prefix={<LockOutlined />}
-          placeholder="Nhập khóa riêng của bạn (Private Key)"
-          value={privateKey}
-          onChange={(e) => setPrivateKey(e.target.value)}
-          style={{ marginBottom: "10px" }}
-        />
+      <Card title="Thông Tin Cá Nhân" style={{ marginBottom: "20px" }}>
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <Avatar size={100} src={userData.avatar} />
+        </div>
+        {isEditing ? (
+          <>
+            <Upload
+              showUploadList={false}
+              beforeUpload={() => false}
+              onChange={handleUpload}
+            >
+              <Button icon={<UploadOutlined />}>Tải lên ảnh đại diện</Button>
+            </Upload>
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Họ và Tên"
+              value={userData.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
+            <Input
+              prefix={<SolutionOutlined />}
+              placeholder="Chức vụ"
+              value={userData.role}
+              onChange={(e) => handleChange("role", e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
+            <Input
+              prefix={<HomeOutlined />}
+              placeholder="Địa chỉ"
+              value={userData.address}
+              onChange={(e) => handleChange("address", e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
+            <Input
+              prefix={<MailOutlined />}
+              placeholder="Email"
+              value={userData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
+            <Input
+              prefix={<PhoneOutlined />}
+              placeholder="Số Điện Thoại"
+              value={userData.phone}
+              onChange={(e) => handleChange("phone", e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
+            <Button
+              type="primary"
+              block
+              style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
+              onClick={() => setIsEditing(false)}
+            >
+              Lưu
+            </Button>
+          </>
+        ) : (
+          <>
+            <p>
+              <b>Họ và Tên:</b> {userData.name}
+            </p>
+            <p>
+              <b>Chức vụ:</b> {userData.role}
+            </p>
+            <p>
+              <b>Địa chỉ:</b> {userData.address}
+            </p>
+            <p>
+              <b>Email:</b> {userData.email}
+            </p>
+            <p>
+              <b>Số điện thoại:</b> {userData.phone}
+            </p>
+            <Button
+              type="primary"
+              block
+              style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
+              onClick={() => setIsEditing(true)}
+            >
+              Cập nhật thông tin
+            </Button>
+          </>
+        )}
+      </Card>
+
+      {/* Xác thực tài khoản */}
+      <Card title="Xác Thực Tài Khoản" style={{ marginBottom: "20px" }}>
         <Button
           type="primary"
-          icon={<KeyOutlined />}
-          onClick={handleLoginWithPrivateKey}
-          loading={loading}
           block
+          onClick={handleLoginWithWallet}
+          loading={loading}
+          style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
         >
-          Xác Thực
+          Xác Thực Bằng MetaMask
         </Button>
       </Card>
 
-      {/* Quản lý khóa riêng */}
-      <Card title="Quản Lý Khóa Riêng" style={{ marginBottom: "20px" }}>
-        <Paragraph>
-          Lưu khóa riêng của bạn một cách an toàn (được mã hóa trong hệ thống).
-        </Paragraph>
-        <Button onClick={savePrivateKey} type="default" block>
-          Lưu Khóa Riêng
-        </Button>
-      </Card>
-
-      {/* Xác thực hai yếu tố */}
+      {/* Xác thực hai yếu tố (2FA) */}
       <Card title="Xác Thực Hai Yếu Tố (2FA)" style={{ marginBottom: "20px" }}>
-        <Paragraph>
-          Bật 2FA để tăng cường bảo mật cho tài khoản của bạn.
-        </Paragraph>
-        <Switch checked={is2FAEnabled} onChange={toggle2FA} />
+        <Switch
+          checked={is2FAEnabled}
+          onChange={() => setIs2FAEnabled(!is2FAEnabled)}
+        />
         <span style={{ marginLeft: "10px" }}>
           {is2FAEnabled ? "Đã bật" : "Đã tắt"}
         </span>
       </Card>
-
-      {/* Trạng thái quyền truy cập */}
-      <Card title="Trạng Thái Quyền Truy Cập">
-        <Paragraph>
-          <SafetyOutlined /> {accessStatus}
-        </Paragraph>
-      </Card>
-
-      {/* Thông báo bảo mật */}
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <Paragraph type="warning">
-          <strong>Lưu ý:</strong> Không chia sẻ khóa riêng của bạn với bất kỳ
-          ai. Hệ thống Blockchain đảm bảo tính bất biến và bảo mật cho hồ sơ
-          bệnh nhân.
-        </Paragraph>
-      </div>
     </div>
   );
 }
