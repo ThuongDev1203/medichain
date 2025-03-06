@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Layout, Menu, Button, Dropdown, message, Typography } from "antd";
 import {
   UserOutlined,
@@ -16,6 +16,7 @@ const { Header } = Layout;
 const { Text } = Typography;
 
 export default function AppHeader() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddress, setUserAddress] = useState(
     localStorage.getItem("userAddress") || null
@@ -74,29 +75,20 @@ export default function AppHeader() {
 
   const mobileMenu = (
     <Menu style={{ minWidth: "180px" }} onClick={() => setMenuVisible(false)}>
-      <Menu.Item key="home" icon={<HomeOutlined />}>
-        <Link to="/">Trang Chủ</Link>
-      </Menu.Item>
+      {menuItems.map((item) => (
+        <Menu.Item key={item.key} icon={item.icon}>
+          {item.label}
+        </Menu.Item>
+      ))}
+      <Menu.Divider />
       {userAddress ? (
-        <>
-          <Menu.Item key="patients" icon={<UserOutlined />}>
-            <Link to="/patient-manager">Bệnh Nhân</Link>
-          </Menu.Item>
-          <Menu.Item key="records" icon={<DatabaseOutlined />}>
-            <Link to="/medical-records">Hồ Sơ Y Tế</Link>
-          </Menu.Item>
-          <Menu.Item key="security" icon={<LockOutlined />}>
-            <Link to="/security">Bảo Mật</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item
-            key="logout"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            Đăng Xuất
-          </Menu.Item>
-        </>
+        <Menu.Item
+          key="logout"
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+        >
+          Đăng Xuất
+        </Menu.Item>
       ) : (
         <Menu.Item key="login" icon={<UserOutlined />} onClick={showModal}>
           Đăng Nhập
@@ -125,6 +117,7 @@ export default function AppHeader() {
       <motion.div
         style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         whileHover={{ scale: 1.1 }}
+        onClick={() => navigate("/")}
       >
         <img
           src="/logoweb.png"
@@ -165,13 +158,17 @@ export default function AppHeader() {
           overlay={mobileMenu}
           trigger={["click"]}
           visible={menuVisible}
-          onVisibleChange={(flag) => setMenuVisible(flag)}
         >
-          <Button type="text" icon={<MenuOutlined />} size="large" />
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            size="large"
+            onClick={() => setMenuVisible(!menuVisible)}
+          />
         </Dropdown>
       )}
 
-      {/* Hiển thị địa chỉ ví & nút đăng nhập/đăng xuất */}
+      {/* Địa chỉ ví & Đăng nhập/Đăng xuất */}
       {!isMobile && (
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {userAddress ? (
@@ -214,10 +211,7 @@ export default function AppHeader() {
         isModalOpen={isModalOpen}
         handleCancel={handleCancel}
         setIsLoggedIn={(status) => {
-          if (status) {
-            const savedAddress = localStorage.getItem("userAddress");
-            setUserAddress(savedAddress);
-          }
+          if (status) setUserAddress(localStorage.getItem("userAddress"));
         }}
       />
     </Header>
