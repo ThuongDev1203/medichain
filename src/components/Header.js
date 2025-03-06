@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout, Menu, Button, message, Typography } from "antd";
+import { Layout, Menu, Button, Dropdown, message, Typography } from "antd";
 import {
   UserOutlined,
   LockOutlined,
   DatabaseOutlined,
   HomeOutlined,
   LogoutOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import AuthModal from "./AuthModal";
@@ -20,6 +21,7 @@ export default function AppHeader() {
     localStorage.getItem("userAddress") || null
   );
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -47,53 +49,61 @@ export default function AppHeader() {
     {
       key: "home",
       icon: <HomeOutlined style={{ color: colors.primary }} />,
-      label: (
-        <Link to="/" style={{ color: colors.dark, fontWeight: "600" }}>
-          Trang Chủ
-        </Link>
-      ),
+      label: <Link to="/">Trang Chủ</Link>,
     },
     ...(userAddress
       ? [
           {
             key: "patients",
             icon: <UserOutlined style={{ color: colors.primary }} />,
-            label: (
-              <Link
-                to="/patient-manager"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Bệnh Nhân
-              </Link>
-            ),
+            label: <Link to="/patient-manager">Bệnh Nhân</Link>,
           },
           {
             key: "records",
             icon: <DatabaseOutlined style={{ color: colors.primary }} />,
-            label: (
-              <Link
-                to="/medical-records"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Hồ Sơ Y Tế
-              </Link>
-            ),
+            label: <Link to="/medical-records">Hồ Sơ Y Tế</Link>,
           },
           {
             key: "security",
             icon: <LockOutlined style={{ color: colors.primary }} />,
-            label: (
-              <Link
-                to="/security"
-                style={{ color: colors.dark, fontWeight: "600" }}
-              >
-                Bảo Mật
-              </Link>
-            ),
+            label: <Link to="/security">Bảo Mật</Link>,
           },
         ]
       : []),
   ];
+
+  const mobileMenu = (
+    <Menu style={{ minWidth: "180px" }} onClick={() => setMenuVisible(false)}>
+      <Menu.Item key="home" icon={<HomeOutlined />}>
+        <Link to="/">Trang Chủ</Link>
+      </Menu.Item>
+      {userAddress ? (
+        <>
+          <Menu.Item key="patients" icon={<UserOutlined />}>
+            <Link to="/patient-manager">Bệnh Nhân</Link>
+          </Menu.Item>
+          <Menu.Item key="records" icon={<DatabaseOutlined />}>
+            <Link to="/medical-records">Hồ Sơ Y Tế</Link>
+          </Menu.Item>
+          <Menu.Item key="security" icon={<LockOutlined />}>
+            <Link to="/security">Bảo Mật</Link>
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item
+            key="logout"
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+          >
+            Đăng Xuất
+          </Menu.Item>
+        </>
+      ) : (
+        <Menu.Item key="login" icon={<UserOutlined />} onClick={showModal}>
+          Đăng Nhập
+        </Menu.Item>
+      )}
+    </Menu>
+  );
 
   return (
     <Header
@@ -136,31 +146,42 @@ export default function AppHeader() {
       </motion.div>
 
       {/* Menu */}
-      <Menu
-        mode="horizontal"
-        defaultSelectedKeys={["home"]}
-        style={{
-          background: "transparent",
-          borderBottom: "none",
-          flex: 1,
-          justifyContent: "center",
-          display: "flex",
-          gap: "30px",
-        }}
-        items={menuItems}
-      />
+      {!isMobile ? (
+        <Menu
+          mode="horizontal"
+          defaultSelectedKeys={["home"]}
+          style={{
+            background: "transparent",
+            borderBottom: "none",
+            flex: 1,
+            justifyContent: "center",
+            display: "flex",
+            gap: "30px",
+          }}
+          items={menuItems}
+        />
+      ) : (
+        <Dropdown
+          overlay={mobileMenu}
+          trigger={["click"]}
+          visible={menuVisible}
+          onVisibleChange={(flag) => setMenuVisible(flag)}
+        >
+          <Button type="text" icon={<MenuOutlined />} size="large" />
+        </Dropdown>
+      )}
 
       {/* Hiển thị địa chỉ ví & nút đăng nhập/đăng xuất */}
-      <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-        {userAddress ? (
-          <>
-            <Button shape="round" type="default">
-              <UserOutlined style={{ marginRight: 8 }} />
-              <Text style={{ fontSize: "12px" }}>
-                {userAddress.slice(0, 6) + "..." + userAddress.slice(-4)}
-              </Text>
-            </Button>
-            {!isMobile && (
+      {!isMobile && (
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          {userAddress ? (
+            <>
+              <Button shape="round" type="default">
+                <UserOutlined style={{ marginRight: 8 }} />
+                <Text style={{ fontSize: "12px" }}>
+                  {userAddress.slice(0, 6) + "..." + userAddress.slice(-4)}
+                </Text>
+              </Button>
               <Button
                 type="default"
                 shape="round"
@@ -169,24 +190,24 @@ export default function AppHeader() {
               >
                 Đăng Xuất
               </Button>
-            )}
-          </>
-        ) : (
-          <Button
-            type="primary"
-            shape="round"
-            icon={<UserOutlined />}
-            style={{
-              background: colors.primary,
-              border: "none",
-              fontWeight: "600",
-            }}
-            onClick={showModal}
-          >
-            Đăng Nhập
-          </Button>
-        )}
-      </div>
+            </>
+          ) : (
+            <Button
+              type="primary"
+              shape="round"
+              icon={<UserOutlined />}
+              style={{
+                background: colors.primary,
+                border: "none",
+                fontWeight: "600",
+              }}
+              onClick={showModal}
+            >
+              Đăng Nhập
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Modal đăng nhập */}
       <AuthModal
